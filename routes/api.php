@@ -30,6 +30,7 @@ Route::post('/payments/momo/notify', [PaymentController::class, 'momoNotify']);
 
 
 
+Route::post('/auth/import', [AuthController::class, 'importExcel']);
 // auth
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::get('/auth/verify', [AuthController::class, 'verifyEmail']);

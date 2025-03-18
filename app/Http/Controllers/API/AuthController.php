@@ -3,17 +3,25 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Imports\UsersImport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
+
+
+    public function showImportForm()
+    {
+        return view('import');
+    }
     public function register(Request $request)
     {
         $request->validate([
@@ -113,5 +121,37 @@ class AuthController extends Controller
             $message->to($user->email)
                 ->subject('Xác nhận email đăng ký');
         });
+    }
+
+
+    public function importExcel(Request $request)
+    {
+        Log::info('Import Excel request received: ' . json_encode($request->all()));
+        Log::info('Files received: ' . json_encode($request->file()));
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:2048',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            if (!$file) {
+                throw new \Exception('No file uploaded');
+            }
+            $import = new UsersImport();
+            Excel::import($import, $file);
+
+            $users = User::whereNull('email_verified_at')->get();
+
+            return response()->json([
+                'message' => 'Import Excel thành công. Email xác thực đã được gửi.',
+                'imported_count' => $users->count(),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Import Excel failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Lỗi khi import Excel: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
