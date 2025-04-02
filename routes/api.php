@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\GoogleAuthController;
+use App\Http\Controllers\API\HotelController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\TransactionController;
@@ -31,12 +32,17 @@ Route::post('/payments/momo/notify', [PaymentController::class, 'momoNotify']);
 
 
 Route::post('/auth/import', [AuthController::class, 'importExcel']);
+Route::post('/auth/import-hotels', [AuthController::class, 'importHotels']);
 // auth
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::get('/auth/verify', [AuthController::class, 'verifyEmail']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+
+
+// hotels
+Route::get('/hotels', [HotelController::class, 'index']);
 Route::middleware(['auth:api', 'role:admin'])->get('/admin', function () {
     return response()->json(['message' => 'Chào mừng Admin']);
 });
